@@ -1,0 +1,668 @@
+// Clase para representar una ficha de dominó
+class DominoTile {
+    constructor(top, bottom) {
+        this.top = top;
+        this.bottom = bottom;
+        this.element = null;
+        this.isPlaced = false;
+        this.player = null;
+        this.orientation = this.determineOrientation();
+    }
+
+    determineOrientation() {
+        // Los dobles (mismo número arriba y abajo) van verticales
+        // Los no dobles van horizontales
+        return this.top === this.bottom ? 'vertical' : 'horizontal';
+    }
+
+    getValue() {
+        return this.top + this.bottom;
+    }
+
+    canConnect(number) {
+        return this.top === number || this.bottom === number;
+    }
+
+    rotate() {
+        [this.top, this.bottom] = [this.bottom, this.top];
+        return this;
+    }
+
+    createElement() {
+        const tile = document.createElement('div');
+        tile.className = 'domino-tile vertical'; // Todas las fichas se muestran verticales a los jugadores
+        tile.dataset.top = this.top;
+        tile.dataset.bottom = this.bottom;
+
+        // Todas las fichas se muestran verticales a los jugadores
+        tile.innerHTML = `
+            <div class="domino-half top">${this.generateDots(this.top)}</div>
+            <div class="domino-half bottom">${this.generateDots(this.bottom)}</div>
+        `;
+
+        tile.addEventListener('click', () => this.select());
+        this.element = tile;
+        return tile;
+    }
+
+    generateDots(number) {
+        if (number === 0) return ''; // Blanco - sin puntos
+
+        const positions = {
+            1: ['center'],
+            2: ['top-left', 'bottom-right'],
+            3: ['top-left', 'center', 'bottom-right'],
+            4: ['top-left', 'top-right', 'bottom-left', 'bottom-right'],
+            5: ['top-left', 'top-right', 'center', 'bottom-left', 'bottom-right'],
+            6: ['top-left', 'top-right', 'middle-left', 'middle-right', 'bottom-left', 'bottom-right']
+        };
+
+        return positions[number].map(pos => `<div class="dot ${pos}"></div>`).join('');
+    }
+
+    select() {
+        if (this.isPlaced) return;
+
+        // Remover selección anterior
+        document.querySelectorAll('.domino-tile.selected').forEach(tile => {
+            tile.classList.remove('selected');
+        });
+
+        // Seleccionar esta ficha
+        this.element.classList.add('selected');
+        game.selectedTile = this;
+
+        // Mostrar botón de jugar ficha
+        const playButton = document.getElementById('play-tile');
+        playButton.style.display = 'inline-block';
+
+        game.logMessage(`Ficha ${this.top}-${this.bottom} seleccionada`);
+    }
+}
+
+// Clase para el juego de dominó
+class DominoGame {
+    constructor() {
+        this.tiles = [];
+        this.players = [];
+        this.currentPlayerIndex = 0;
+        this.board = [];
+        this.boardEnds = { left: null, right: null };
+        this.selectedTile = null;
+        this.gameStarted = false;
+        this.scores = { teamA: 0, teamB: 0 };
+        this.questions = this.loadQuestions();
+
+        this.initializeGame();
+        this.setupEventListeners();
+    }
+
+    // Crear exactamente las 28 fichas del dominó de manera correcta
+    createTiles() {
+        this.tiles = [];
+        let tileCount = 0;
+
+        console.log('=== CREACIÓN DE FICHAS ===');
+
+        // Generar todas las combinaciones únicas de fichas del dominó (0-6)
+        // Usando dos bucles para evitar duplicados: para cada par (i,j) donde i <= j
+        for (let i = 0; i <= 6; i++) {
+            for (let j = i; j <= 6; j++) {
+                const tile = new DominoTile(i, j);
+                this.tiles.push(tile);
+                tileCount++;
+                console.log(`Ficha ${tileCount}: ${i}-${j}`);
+            }
+        }
+
+        console.log(`\nCreadas ${this.tiles.length} fichas de dominó`);
+
+        // Verificar que tenemos exactamente 28 fichas
+        if (this.tiles.length !== 28) {
+            console.error(`ERROR CRÍTICO: Se esperaban 28 fichas pero se crearon ${this.tiles.length}`);
+        } else {
+            console.log('✓ Verificación: Se crearon exactamente 28 fichas únicas');
+        }
+
+        console.log('=== FIN CREACIÓN ===\n');
+        this.shuffleTiles();
+    }
+
+    // Mezclar las fichas
+    shuffleTiles() {
+        for (let i = this.tiles.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [this.tiles[i], this.tiles[j]] = [this.tiles[j], this.tiles[i]];
+        }
+    }
+
+    // Crear jugadores
+    createPlayers() {
+        this.players = [
+            { name: 'Jugador 1', team: 'A', tiles: [], element: document.getElementById('player1-tiles') },
+            { name: 'Jugador 2', team: 'B', tiles: [], element: document.getElementById('player2-tiles') },
+            { name: 'Jugador 3', team: 'A', tiles: [], element: document.getElementById('player3-tiles') },
+            { name: 'Jugador 4', team: 'B', tiles: [], element: document.getElementById('player4-tiles') }
+        ];
+    }
+
+    // Repartir fichas
+    dealTiles() {
+        console.log('=== REPARTIENDO FICHAS ===');
+        console.log(`Total fichas disponibles: ${this.tiles.length}`);
+
+        // Verificar que tenemos exactamente 28 fichas antes de repartir
+        if (this.tiles.length !== 28) {
+            console.error(`ERROR CRÍTICO: Se esperaban 28 fichas pero hay ${this.tiles.length}`);
+            return;
+        }
+
+        // Mostrar todas las fichas disponibles antes del reparto
+        console.log('Fichas disponibles antes del reparto:', this.tiles.map(t => `${t.top}-${t.bottom}`).sort());
+
+        let tileIndex = 0;
+        this.players.forEach((player, playerIndex) => {
+            player.tiles = [];
+            console.log(`\nRepartiendo a ${player.name}:`);
+
+            for (let i = 0; i < 7; i++) {
+                if (tileIndex >= this.tiles.length) {
+                    console.error(`ERROR: No hay suficientes fichas! Solo quedan ${this.tiles.length - tileIndex} fichas`);
+                    break;
+                }
+
+                const tile = this.tiles[tileIndex++];
+                tile.player = player;
+                player.tiles.push(tile);
+                console.log(`  Ficha ${i+1}: ${tile.top}-${tile.bottom}`);
+            }
+
+            console.log(`  Total fichas para ${player.name}: ${player.tiles.length}`);
+            // Mostrar todas las fichas del jugador para verificar duplicados
+            console.log(`  Fichas de ${player.name}:`, player.tiles.map(t => `${t.top}-${t.bottom}`));
+        });
+
+        console.log(`\nFichas restantes en el montón: ${this.tiles.length - tileIndex}`);
+        console.log('=== FIN REPARTO ===\n');
+
+        this.updatePlayerDisplays();
+    }
+
+    // Actualizar la visualización de las fichas de los jugadores
+    updatePlayerDisplays() {
+        this.players.forEach((player, index) => {
+            player.element.innerHTML = '';
+
+            // Solo mostrar fichas del jugador en turno
+            if (index === this.currentPlayerIndex) {
+                player.tiles.forEach(tile => {
+                    const tileElement = tile.createElement();
+                    player.element.appendChild(tileElement);
+                });
+            } else {
+                // Mostrar fichas ocultas para los otros jugadores
+                for (let i = 0; i < player.tiles.length; i++) {
+                    const hiddenTile = document.createElement('div');
+                    hiddenTile.className = 'domino-tile hidden-tile';
+                    hiddenTile.innerHTML = `
+                        <div class="domino-half top"></div>
+                        <div class="domino-half bottom"></div>
+                    `;
+                    player.element.appendChild(hiddenTile);
+                }
+            }
+
+            // Actualizar información del turno
+            const infoElement = document.getElementById(`player${index + 1}-info`);
+            if (index === this.currentPlayerIndex) {
+                infoElement.textContent = 'Turno actual';
+                infoElement.style.color = '#e74c3c';
+            } else {
+                infoElement.textContent = '';
+            }
+        });
+    }
+
+    // Verificar si un movimiento es válido
+    canPlaceTile(tile, position) {
+        if (!tile) return false;
+
+        if (this.board.length === 0) {
+            // Primera ficha siempre puede colocarse
+            return true;
+        }
+
+        let targetNumber;
+        if (position === 'left') {
+            targetNumber = this.boardEnds.left;
+        } else if (position === 'right') {
+            targetNumber = this.boardEnds.right;
+        } else {
+            return false;
+        }
+
+        // Verificar si alguno de los números de la ficha coincide con el número objetivo
+        const canConnect = tile.top === targetNumber || tile.bottom === targetNumber;
+        
+        if (canConnect) {
+            console.log(`✓ Ficha ${tile.top}-${tile.bottom} puede conectarse con ${targetNumber} en ${position}`);
+        } else {
+            console.log(`✗ Ficha ${tile.top}-${tile.bottom} NO puede conectarse con ${targetNumber} en ${position}`);
+        }
+        
+        return canConnect;
+    }
+
+    // Colocar ficha en el tablero
+    placeTile(tile, position) {
+        if (!this.canPlaceTile(tile, position)) {
+            this.logMessage(`No se puede colocar la ficha ${tile.top}-${tile.bottom} en ${position}`);
+            return false;
+        }
+
+        // Determinar el número objetivo
+        let targetNumber;
+        if (position === 'left') {
+            targetNumber = this.boardEnds.left;
+        } else {
+            targetNumber = this.boardEnds.right;
+        }
+
+        // Rotar la ficha para que el número correcto quede en el extremo correcto
+        if (position === 'left') {
+            // Para colocar a la izquierda, el número objetivo debe estar en la parte superior de la ficha
+            if (tile.bottom === targetNumber) {
+                tile.rotate(); // Rotar para que el número objetivo quede arriba
+            }
+            // Actualizar el extremo izquierdo con el número que queda en la parte superior
+            this.boardEnds.left = tile.top;
+        } else {
+            // Para colocar a la derecha, el número objetivo debe estar en la parte inferior de la ficha
+            if (tile.top === targetNumber) {
+                tile.rotate(); // Rotar para que el número objetivo quede abajo
+            }
+            // Actualizar el extremo derecho con el número que queda en la parte inferior
+            this.boardEnds.right = tile.bottom;
+        }
+
+        // Agregar al tablero
+        if (position === 'left') {
+            this.board.unshift(tile);
+        } else {
+            this.board.push(tile);
+        }
+
+        tile.isPlaced = true;
+
+        // Remover de las fichas del jugador
+        const player = tile.player;
+        player.tiles = player.tiles.filter(t => t !== tile);
+
+        this.updateBoard();
+        this.updatePlayerDisplays();
+
+        this.logMessage(`${player.name} colocó ${tile.top}-${tile.bottom} en ${position}. Extremos: ${this.boardEnds.left}-${this.boardEnds.right}`);
+
+        // Verificar si el jugador se quedó sin fichas
+        if (player.tiles.length === 0) {
+            this.endHand(player.team);
+            return true;
+        }
+
+        this.nextTurn();
+        return true;
+    }
+
+    // Actualizar visualización del tablero
+    updateBoard() {
+        const boardElement = document.getElementById('game-board');
+        boardElement.innerHTML = '';
+
+        this.board.forEach(tile => {
+            // Crear un nuevo elemento para el tablero
+            const boardTile = document.createElement('div');
+            
+            // En el tablero, aplicar la orientación correcta según el tipo de ficha
+            if (tile.top === tile.bottom) {
+                // Dobles van verticales en el tablero
+                boardTile.className = 'domino-tile vertical';
+                boardTile.innerHTML = `
+                    <div class="domino-half top">${tile.generateDots(tile.top)}</div>
+                    <div class="domino-half bottom">${tile.generateDots(tile.bottom)}</div>
+                `;
+            } else {
+                // No dobles van horizontales en el tablero
+                boardTile.className = 'domino-tile horizontal';
+                boardTile.innerHTML = `
+                    <div class="domino-half left">${tile.generateDots(tile.top)}</div>
+                    <div class="domino-half right">${tile.generateDots(tile.bottom)}</div>
+                `;
+            }
+            
+            boardElement.appendChild(boardTile);
+        });
+    }
+
+    // Pasar al siguiente turno
+    nextTurn() {
+        this.currentPlayerIndex = (this.currentPlayerIndex + 1) % 4;
+        this.selectedTile = null;
+        document.getElementById('play-tile').style.display = 'none';
+        this.updatePlayerDisplays();
+    }
+
+    // Terminar la mano
+    endHand(winningTeam) {
+        const losingTeam = winningTeam === 'A' ? 'B' : 'A';
+        const points = this.calculatePoints();
+
+        this.logMessage(`¡Equipo ${winningTeam} gana la mano! Puntos: ${points}`);
+
+        // Mostrar pregunta al equipo perdedor
+        this.showQuestion(losingTeam, points);
+    }
+
+    // Calcular puntos de la mano actual
+    calculatePoints() {
+        let points = 0;
+        this.players.forEach(player => {
+            player.tiles.forEach(tile => {
+                points += tile.getValue();
+            });
+        });
+        return points;
+    }
+
+    // Mostrar pregunta
+    showQuestion(team, points) {
+        const modal = document.getElementById('question-modal');
+        const question = this.questions[Math.floor(Math.random() * this.questions.length)];
+
+        document.getElementById('question-text').textContent = question.question;
+
+        const answersDiv = document.querySelector('.answers');
+        answersDiv.innerHTML = '';
+
+        question.options.forEach((option, index) => {
+            const button = document.createElement('button');
+            button.className = 'answer-btn';
+            button.textContent = option;
+            button.dataset.correct = index === question.correctIndex;
+            button.addEventListener('click', () => this.checkAnswer(team, points, index === question.correctIndex));
+            answersDiv.appendChild(button);
+        });
+
+        modal.style.display = 'flex';
+    }
+
+    // Verificar respuesta
+    checkAnswer(team, points, isCorrect) {
+        const modal = document.getElementById('question-modal');
+        modal.style.display = 'none';
+
+        if (isCorrect) {
+            const halfPoints = Math.floor(points / 2);
+            this.addPoints(team === 'A' ? 'B' : 'A', halfPoints);
+            this.logMessage(`¡Respuesta correcta! Equipo ${team === 'A' ? 'B' : 'A'} gana ${halfPoints} puntos (mitad)`);
+        } else {
+            this.addPoints(team === 'A' ? 'B' : 'A', points);
+            this.logMessage(`Respuesta incorrecta. Equipo ${team === 'A' ? 'B' : 'A'} gana ${points} puntos completos`);
+        }
+
+        // Iniciar nueva mano
+        setTimeout(() => this.newHand(), 2000);
+    }
+
+    // Añadir puntos a un equipo
+    addPoints(team, points) {
+        if (team === 'A') {
+            this.scores.teamA += points;
+            document.getElementById('score-team-a').textContent = this.scores.teamA;
+        } else {
+            this.scores.teamB += points;
+            document.getElementById('score-team-b').textContent = this.scores.teamB;
+        }
+    }
+
+    // Iniciar nueva mano
+    newHand() {
+        this.board = [];
+        this.boardEnds = { left: null, right: null };
+        this.currentPlayerIndex = 0;
+        this.selectedTile = null;
+
+        // Devolver todas las fichas de los jugadores al montón
+        this.players.forEach(player => {
+            player.tiles.forEach(tile => {
+                tile.player = null;
+                tile.isPlaced = false;
+                tile.element = null; // Limpiar referencia al elemento
+            });
+            player.tiles = [];
+        });
+
+        // Asegurar que tenemos exactamente 28 fichas
+        if (this.tiles.length !== 28) {
+            console.error(`ERROR: Se esperaban 28 fichas pero hay ${this.tiles.length}. Recreando fichas...`);
+            this.createTiles();
+        } else {
+            // Mezclar todas las fichas nuevamente
+            this.shuffleTiles();
+        }
+        
+        this.dealTiles();
+        this.updateBoard();
+
+        this.logMessage('Nueva mano iniciada');
+    }
+
+    // Inicializar el juego
+    initializeGame() {
+        this.createPlayers();
+        // NO crear fichas aquí - se crean cuando se inicia la partida
+        this.updateBoard();
+    }
+
+    // Configurar event listeners
+    setupEventListeners() {
+        document.getElementById('start-game').addEventListener('click', () => {
+            if (!this.gameStarted) {
+                this.gameStarted = true;
+                this.createTiles(); // Crear fichas solo cuando se inicia la partida
+                this.dealTiles();
+                this.logMessage('Juego iniciado');
+            }
+        });
+
+        document.getElementById('draw-tile').addEventListener('click', () => {
+            this.drawTile();
+        });
+
+        document.getElementById('pass-turn').addEventListener('click', () => {
+            this.nextTurn();
+            this.logMessage('Turno pasado');
+        });
+
+        document.getElementById('play-tile').addEventListener('click', () => {
+            this.showPlacementOptions();
+        });
+
+        document.getElementById('end-hand').addEventListener('click', () => {
+            // Forzar fin de mano (para pruebas)
+            const currentPlayer = this.players[this.currentPlayerIndex];
+            this.endHand(currentPlayer.team);
+        });
+
+        document.getElementById('reset-game').addEventListener('click', () => {
+            this.resetGame();
+        });
+
+        // Ya no necesitamos event listener del tablero - ahora usamos botones
+    }
+
+    // Cargar preguntas de prueba
+    loadQuestions() {
+        return [
+            {
+                question: "¿Cuántos vértices tiene un cubo?",
+                options: ["6", "8", "12", "4"],
+                correctIndex: 1
+            },
+            {
+                question: "¿Qué es un grafo completo de 4 vértices?",
+                options: ["K3", "K4", "C4", "P4"],
+                correctIndex: 1
+            },
+            {
+                question: "¿Cuál es la fórmula para calcular el número de aristas en un grafo completo Kn?",
+                options: ["n(n-1)", "n(n-1)/2", "n²", "2n"],
+                correctIndex: 1
+            },
+            {
+                question: "¿Qué representa la matriz de adyacencia?",
+                options: ["Pesos de aristas", "Conexiones entre vértices", "Grados de vértices", "Componentes conexas"],
+                correctIndex: 1
+            },
+            {
+                question: "¿Cuál es el grado máximo posible en un grafo simple con n vértices?",
+                options: ["n", "n-1", "n/2", "2n"],
+                correctIndex: 1
+            }
+        ];
+    }
+
+    // Robar una ficha del montón
+    drawTile() {
+        const currentPlayer = this.players[this.currentPlayerIndex];
+
+        // Verificar si quedan fichas para robar
+        if (this.tiles.length === 0) {
+            this.logMessage('No quedan fichas para robar');
+            this.nextTurn();
+            return;
+        }
+
+        // Robar la primera ficha disponible
+        const drawnTile = this.tiles.pop();
+        drawnTile.player = currentPlayer;
+        currentPlayer.tiles.push(drawnTile);
+
+        this.updatePlayerDisplays();
+        this.logMessage(`${currentPlayer.name} robó una ficha: ${drawnTile.top}-${drawnTile.bottom}`);
+
+        // Pasar al siguiente turno después de robar
+        this.nextTurn();
+    }
+
+    // Reiniciar el juego completamente
+    resetGame() {
+        this.board = [];
+        this.boardEnds = { left: null, right: null };
+        this.currentPlayerIndex = 0;
+        this.selectedTile = null;
+        this.gameStarted = false;
+        this.scores = { teamA: 0, teamB: 0 };
+
+        // Limpiar las fichas existentes
+        this.tiles = [];
+
+        // Limpiar fichas de jugadores
+        this.players.forEach(player => {
+            player.tiles = [];
+        });
+
+        // Limpiar tablero y actualizar puntuaciones
+        this.updateBoard();
+        this.updatePlayerDisplays();
+        document.getElementById('score-team-a').textContent = '0';
+        document.getElementById('score-team-b').textContent = '0';
+
+        // Ocultar botón de jugar ficha
+        document.getElementById('play-tile').style.display = 'none';
+
+        // Limpiar log
+        document.getElementById('log-content').innerHTML = '';
+
+        this.logMessage('Juego reiniciado');
+    }
+
+    // Mostrar opciones de colocación de ficha
+    showPlacementOptions() {
+        if (!this.selectedTile) return;
+
+        // Verificar qué posiciones son válidas
+        const canPlaceLeft = this.canPlaceTile(this.selectedTile, 'left');
+        const canPlaceRight = this.canPlaceTile(this.selectedTile, 'right');
+
+        // Si no se puede colocar en ningún lado, mostrar mensaje
+        if (!canPlaceLeft && !canPlaceRight) {
+            this.logMessage(`No se puede colocar la ficha ${this.selectedTile.top}-${this.selectedTile.bottom} en ningún extremo`);
+            this.selectedTile.element.classList.remove('selected');
+            this.selectedTile = null;
+            document.getElementById('play-tile').style.display = 'none';
+            return;
+        }
+
+        // Crear modal de opciones
+        const modal = document.createElement('div');
+        modal.className = 'placement-modal';
+        
+        let optionsHTML = '';
+        if (canPlaceLeft) {
+            optionsHTML += '<button class="placement-btn" data-position="left">Izquierda</button>';
+        }
+        if (canPlaceRight) {
+            optionsHTML += '<button class="placement-btn" data-position="right">Derecha</button>';
+        }
+        optionsHTML += '<button class="placement-btn cancel" data-position="cancel">Cancelar</button>';
+
+        modal.innerHTML = `
+            <div class="placement-modal-content">
+                <h3>¿Dónde colocar la ficha ${this.selectedTile.top}-${this.selectedTile.bottom}?</h3>
+                <div class="placement-options">
+                    ${optionsHTML}
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        // Event listeners para las opciones
+        modal.querySelectorAll('.placement-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const position = e.target.dataset.position;
+
+                if (position === 'cancel') {
+                    // Cancelar selección
+                    this.selectedTile.element.classList.remove('selected');
+                    this.selectedTile = null;
+                    document.getElementById('play-tile').style.display = 'none';
+                    this.logMessage('Selección cancelada');
+                } else {
+                    // Intentar colocar la ficha
+                    if (this.placeTile(this.selectedTile, position)) {
+                        // Éxito - limpiar selección
+                        document.getElementById('play-tile').style.display = 'none';
+                    }
+                }
+
+                // Remover modal
+                document.body.removeChild(modal);
+            });
+        });
+    }
+
+    // Añadir mensaje al log
+    logMessage(message) {
+        const logContent = document.getElementById('log-content');
+        const timestamp = new Date().toLocaleTimeString();
+        logContent.innerHTML += `<div>[${timestamp}] ${message}</div>`;
+        logContent.scrollTop = logContent.scrollHeight;
+    }
+}
+
+// Inicializar el juego cuando se carga la página
+let game;
+document.addEventListener('DOMContentLoaded', () => {
+    game = new DominoGame();
+});

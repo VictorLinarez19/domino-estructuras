@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dominó - Estructuras Discretas</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="game-container">
+        <header class="game-header">
+            <h1>Dominó - Estructuras Discretas</h1>
+            <div class="score-display">
+                <div class="team-score">
+                    <h3>Equipo A</h3>
+                    <span id="score-team-a">0</span>
+                </div>
+                <div class="team-score">
+                    <h3>Equipo B</h3>
+                    <span id="score-team-b">0</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="controls-top">
+            <button id="start-game">Iniciar Partida</button>
+            <button id="draw-tile">Robar Ficha</button>
+            <button id="pass-turn">Pasar Turno</button>
+            <button id="play-tile" style="display: none;">Jugar Ficha</button>
+            <button id="end-hand">Terminar Mano</button>
+            <button id="reset-game">Reiniciar Juego</button>
+        </div>
+
+        <div class="game-area">
+            <div class="board-container">
+                <div id="game-board" class="game-board"></div>
+            </div>
+
+            <div class="players-area">
+                <div class="player-section">
+                    <h3>Jugador 1 (Equipo A)</h3>
+                    <div id="player1-tiles" class="player-tiles"></div>
+                    <div id="player1-info" class="player-info">Turno actual</div>
+                </div>
+
+                <div class="player-section">
+                    <h3>Jugador 2 (Equipo B)</h3>
+                    <div id="player2-tiles" class="player-tiles"></div>
+                    <div id="player2-info" class="player-info"></div>
+                </div>
+
+                <div class="player-section">
+                    <h3>Jugador 3 (Equipo A)</h3>
+                    <div id="player3-tiles" class="player-tiles"></div>
+                    <div id="player3-info" class="player-info"></div>
+                </div>
+
+                <div class="player-section">
+                    <h3>Jugador 4 (Equipo B)</h3>
+                    <div id="player4-tiles" class="player-tiles"></div>
+                    <div id="player4-info" class="player-info"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="question-modal" class="modal">
+            <div class="modal-content">
+                <h2>¡Pregunta!</h2>
+                <p id="question-text">¿Cuál es la capital de Francia?</p>
+                <div class="answers">
+                    <button class="answer-btn" data-correct="true">París</button>
+                    <button class="answer-btn">Londres</button>
+                    <button class="answer-btn">Madrid</button>
+                    <button class="answer-btn">Roma</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="game-log" class="game-log">
+            <h3>Registro del Juego</h3>
+            <div id="log-content"></div>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>

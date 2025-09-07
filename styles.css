@@ -1,0 +1,596 @@
+/* Estilos generales */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Arial', sans-serif;
+}
+
+body {
+    background: linear-gradient(135deg, #2c3e50, #3498db);
+    color: #333;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.game-container {
+    max-width: 1600px;
+    margin: 0 auto;
+    background: #ecf0f1;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    overflow: hidden;
+}
+
+/* Header */
+.game-header {
+    background: linear-gradient(135deg, #34495e, #2c3e50);
+    color: white;
+    padding: 20px;
+    text-align: center;
+}
+
+.game-header h1 {
+    margin-bottom: 20px;
+    font-size: 2.5em;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+.score-display {
+    display: flex;
+    justify-content: center;
+    gap: 50px;
+}
+
+.team-score {
+    background: rgba(255,255,255,0.1);
+    padding: 15px 25px;
+    border-radius: 10px;
+    border: 2px solid rgba(255,255,255,0.3);
+}
+
+.team-score h3 {
+    margin-bottom: 10px;
+    font-size: 1.2em;
+}
+
+.team-score span {
+    font-size: 2em;
+    font-weight: bold;
+    color: #f39c12;
+}
+
+/* Controles superiores */
+.controls-top {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    padding: 15px 20px;
+    background: #34495e;
+    border-bottom: 2px solid #2c3e50;
+}
+
+.controls-top button {
+    padding: 10px 18px;
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    color: white;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.controls-top button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+}
+
+/* Área del juego */
+.game-area {
+    display: flex;
+    padding: 20px;
+    gap: 20px;
+    min-height: 600px;
+}
+
+.board-container {
+    flex: 2;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.game-board {
+    background: #27ae60;
+    border-radius: 15px;
+    padding: 30px;
+    min-height: 500px;
+    min-width: 900px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    justify-content: center;
+    box-shadow: inset 0 0 25px rgba(0,0,0,0.3);
+}
+
+/* Fichas de dominó */
+.domino-tile {
+    background: white;
+    border: 2px solid #333;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+    position: relative;
+}
+
+/* Fichas verticales (dobles) - Proporciones correctas del dominó */
+.domino-tile.vertical {
+    width: 40px;
+    height: 80px;
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Fichas horizontales (no dobles) - Proporciones correctas del dominó */
+.domino-tile.horizontal {
+    width: 80px;
+    height: 40px;
+    border-radius: 4px;
+    display: flex;
+    flex-direction: row;
+}
+
+/* Fichas en el tablero son más grandes */
+.game-board .domino-tile.vertical {
+    width: 50px;
+    height: 100px;
+    border-radius: 6px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+.game-board .domino-tile.horizontal {
+    width: 100px;
+    height: 50px;
+    border-radius: 6px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+.domino-tile:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+}
+
+.domino-tile.selected {
+    border-color: #e74c3c;
+    box-shadow: 0 0 15px rgba(231, 76, 60, 0.5);
+}
+
+.domino-half {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 20px;
+    font-weight: bold;
+    color: #333;
+    position: relative;
+}
+
+/* Mitades verticales (para fichas verticales) */
+.domino-half.top {
+    border-bottom: 1px solid #333;
+}
+
+.domino-half.bottom {
+    border-top: 1px solid #333;
+}
+
+/* Mitades horizontales (para fichas horizontales) */
+.domino-half.left {
+    border-right: 1px solid #333;
+}
+
+.domino-half.right {
+    border-left: 1px solid #333;
+}
+
+.domino-half::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 6px;
+    height: 6px;
+    background: #333;
+    border-radius: 50%;
+}
+
+/* Fichas ocultas - Todas verticales para los jugadores */
+.hidden-tile {
+    background: #666 !important;
+    border-color: #999 !important;
+    cursor: default !important;
+    width: 40px !important;
+    height: 80px !important;
+}
+
+.hidden-tile .domino-half {
+    background: #666 !important;
+    border-color: #999 !important;
+}
+
+/* Puntos en las fichas - Tamaño correcto según la referencia */
+.dot {
+    position: absolute;
+    width: 5px;
+    height: 5px;
+    background: #333;
+    border-radius: 50%;
+    font-size: 0; /* Ocultar cualquier texto */
+}
+
+/* Puntos más grandes para fichas del tablero */
+.game-board .dot {
+    width: 7px;
+    height: 7px;
+}
+
+/* Posiciones para fichas VERTICALES - Patrones estándar del dominó */
+.domino-tile.vertical .dot.center {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.domino-tile.vertical .dot.top-left {
+    top: 25%;
+    left: 25%;
+}
+
+.domino-tile.vertical .dot.top-right {
+    top: 25%;
+    right: 25%;
+}
+
+.domino-tile.vertical .dot.middle-left {
+    top: 50%;
+    left: 25%;
+    transform: translateY(-50%);
+}
+
+.domino-tile.vertical .dot.middle-right {
+    top: 50%;
+    right: 25%;
+    transform: translateY(-50%);
+}
+
+.domino-tile.vertical .dot.bottom-left {
+    bottom: 25%;
+    left: 25%;
+}
+
+.domino-tile.vertical .dot.bottom-right {
+    bottom: 25%;
+    right: 25%;
+}
+
+/* Posiciones para fichas HORIZONTALES - Patrones estándar del dominó */
+.domino-tile.horizontal .dot.center {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.domino-tile.horizontal .dot.top-left {
+    top: 25%;
+    left: 25%;
+}
+
+.domino-tile.horizontal .dot.top-right {
+    top: 25%;
+    right: 25%;
+}
+
+.domino-tile.horizontal .dot.middle-left {
+    top: 50%;
+    left: 25%;
+    transform: translateY(-50%);
+}
+
+.domino-tile.horizontal .dot.middle-right {
+    top: 50%;
+    right: 25%;
+    transform: translateY(-50%);
+}
+
+.domino-tile.horizontal .dot.bottom-left {
+    bottom: 25%;
+    left: 25%;
+}
+
+.domino-tile.horizontal .dot.bottom-right {
+    bottom: 25%;
+    right: 25%;
+}
+
+/* Área de jugadores */
+.players-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    max-width: 350px;
+}
+
+.player-section {
+    background: rgba(255,255,255,0.9);
+    border-radius: 10px;
+    padding: 15px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.player-section h3 {
+    margin-bottom: 10px;
+    color: #2c3e50;
+    text-align: center;
+}
+
+.player-tiles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    min-height: 60px;
+    justify-content: center;
+}
+
+.player-info {
+    margin-top: 10px;
+    text-align: center;
+    font-weight: bold;
+    color: #e74c3c;
+}
+
+
+/* Modal de preguntas */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.8);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    max-width: 500px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+.modal-content h2 {
+    margin-bottom: 20px;
+    color: #2c3e50;
+}
+
+.answers {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.answer-btn {
+    padding: 12px 20px;
+    background: #3498db;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+
+.answer-btn:hover {
+    background: #2980b9;
+    transform: translateY(-2px);
+}
+
+/* Modal de colocación de fichas */
+.placement-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.7);
+    z-index: 1001;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.placement-modal-content {
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    max-width: 400px;
+}
+
+.placement-modal-content h3 {
+    margin-bottom: 25px;
+    color: #2c3e50;
+    font-size: 1.3em;
+}
+
+.placement-options {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+}
+
+.placement-btn {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    min-width: 100px;
+}
+
+.placement-btn:not(.cancel) {
+    background: #3498db;
+    color: white;
+}
+
+.placement-btn:not(.cancel):hover {
+    background: #2980b9;
+    transform: translateY(-2px);
+}
+
+.placement-btn.cancel {
+    background: #e74c3c;
+    color: white;
+}
+
+.placement-btn.cancel:hover {
+    background: #c0392b;
+    transform: translateY(-2px);
+}
+
+/* Log del juego */
+.game-log {
+    background: rgba(255,255,255,0.95);
+    margin: 20px;
+    border-radius: 10px;
+    padding: 20px;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.game-log h3 {
+    margin-bottom: 15px;
+    color: #2c3e50;
+}
+
+#log-content {
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+/* Responsive */
+@media (max-width: 1400px) {
+    .game-container {
+        max-width: 1200px;
+    }
+
+    .game-board {
+        min-width: 700px;
+        min-height: 400px;
+    }
+
+    /* Ajustar tamaño de fichas horizontales en tablero */
+    .game-board .domino-tile.horizontal {
+        width: 90px;
+        height: 45px;
+    }
+}
+
+@media (max-width: 1100px) {
+    .game-area {
+        flex-direction: column;
+    }
+
+    .players-area {
+        max-width: none;
+        flex-direction: row;
+        justify-content: space-between;
+    }
+
+    .player-section {
+        flex: 1;
+        min-width: 200px;
+    }
+
+    .game-board {
+        min-width: 600px;
+        min-height: 350px;
+    }
+
+    /* Ajustar tamaño de fichas horizontales en tablero */
+    .game-board .domino-tile.horizontal {
+        width: 80px;
+        height: 40px;
+    }
+
+    /* Todas las fichas de jugadores son verticales */
+    .domino-tile {
+        width: 35px;
+        height: 70px;
+    }
+}
+
+@media (max-width: 768px) {
+    .score-display {
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .controls-top {
+        flex-wrap: wrap;
+        padding: 10px;
+    }
+
+    .controls-top button {
+        flex: 1;
+        min-width: 120px;
+        margin: 5px;
+    }
+
+    .game-board {
+        min-width: 500px;
+        min-height: 300px;
+        padding: 20px;
+    }
+
+    .players-area {
+        gap: 10px;
+    }
+
+    .player-section {
+        padding: 10px;
+    }
+
+    /* Ajustar tamaño de fichas en móviles - Todas verticales para jugadores */
+    .domino-tile {
+        width: 30px;
+        height: 60px;
+    }
+
+    .game-board .domino-tile.vertical {
+        width: 45px;
+        height: 90px;
+    }
+
+    .game-board .domino-tile.horizontal {
+        width: 80px;
+        height: 40px;
+    }
+}
