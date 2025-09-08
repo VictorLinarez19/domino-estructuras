@@ -587,14 +587,15 @@ body {
 
 /* Modal de turno del jugador */
 .turn-modal-content {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
+    background: white;
+    color: #333;
     padding: 40px;
     border-radius: 20px;
     max-width: 400px;
     text-align: center;
-    box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.2);
     animation: modalAppear 0.5s ease-out;
+    border: 2px solid #e0e0e0;
 }
 
 @keyframes modalAppear {
@@ -610,9 +611,9 @@ body {
 
 .turn-modal-content h2 {
     margin-bottom: 30px;
-    color: white;
+    color: #333;
     font-size: 2.2em;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    text-shadow: none;
 }
 
 .turn-player-info {
@@ -621,9 +622,9 @@ body {
     justify-content: center;
     margin-bottom: 30px;
     padding: 20px;
-    background: rgba(255,255,255,0.1);
+    background: #f8f9fa;
     border-radius: 15px;
-    backdrop-filter: blur(10px);
+    border: 1px solid #e9ecef;
 }
 
 .player-avatar {
@@ -644,19 +645,19 @@ body {
 .player-details h3 {
     margin: 0 0 5px 0;
     font-size: 1.4em;
-    color: white;
+    color: #333;
 }
 
 .player-details p {
     margin: 0;
     font-size: 1.1em;
     opacity: 0.9;
-    color: #e8f4f8;
+    color: #666;
 }
 
 .continue-btn {
     padding: 15px 30px;
-    background: linear-gradient(45deg, #ff6b6b, #feca57);
+    background: linear-gradient(45deg, #0195ff, #01bbff);
     color: white;
     border: none;
     border-radius: 25px;
@@ -670,7 +671,7 @@ body {
 }
 
 .continue-btn:hover {
-    background: linear-gradient(45deg, #ff5252, #ffb74d);
+    background: linear-gradient(45deg, #0186e6, #02aeec);
     transform: translateY(-2px);
     box-shadow: 0 8px 25px rgba(255,107,107,0.4);
 }
