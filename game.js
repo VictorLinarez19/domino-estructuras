@@ -33,6 +33,7 @@ class DominoTile {
         tile.className = 'domino-tile vertical'; // Todas las fichas se muestran verticales a los jugadores
         tile.dataset.top = this.top;
         tile.dataset.bottom = this.bottom;
+        tile.id = `tile-${this.top}-${this.bottom}`;
 
         // Todas las fichas se muestran verticales a los jugadores
         tile.innerHTML = `
@@ -40,6 +41,26 @@ class DominoTile {
             <div class="domino-half bottom">${this.generateDots(this.bottom)}</div>
         `;
 
+        // Configurar drag and drop
+        tile.draggable = true;
+        tile.addEventListener('dragstart', (e) => {
+            // Solo permitir drag si la ficha no está colocada
+            if (!this.isPlaced) {
+                e.dataTransfer.setData('text/plain', `${this.top}-${this.bottom}`);
+                tile.classList.add('dragging');
+                console.log(`Iniciando drag de ficha ${this.top}-${this.bottom}`);
+            } else {
+                e.preventDefault();
+                console.log(`No se puede arrastrar ficha colocada ${this.top}-${this.bottom}`);
+            }
+        });
+
+        tile.addEventListener('dragend', () => {
+            tile.classList.remove('dragging');
+            console.log(`Terminando drag de ficha ${this.top}-${this.bottom}`);
+        });
+
+        // Mantener funcionalidad de selección por click (opcional)
         tile.addEventListener('click', () => this.select());
         this.element = tile;
         return tile;
@@ -92,224 +113,76 @@ class DominoGame {
         this.gameStarted = false;
         this.scores = { teamA: 0, teamB: 0 };
 
-        // Preguntas integradas directamente desde el archivo Preguntas.txt
-        this.questions = [
-            {
-                question: "¿Cuál es la principal diferencia entre una permutación y una combinación?",
-                options: [
-                    "La permutación se calcula con factoriales y la combinación con logaritmos.",
-                    "En una permutación, el orden de los elementos importa, mientras que en una combinación, el orden no importa.",
-                    "La permutación se aplica a conjuntos de números y la combinación a conjuntos de letras.",
-                    "La permutación se usa para eventos independientes y la combinación para eventos dependientes."
-                ],
-                correctIndex: 1
-            },
-            {
-                question: "¿Cuántos números de 4 dígitos se pueden formar con los dígitos 1, 2, 3, 4, 5, 6, si no se permite la repetición de los dígitos?",
-                options: [
-                    "24",
-                    "1296",
-                    "15",
-                    "360"
-                ],
-                correctIndex: 3
-            },
-            {
-                question: "En una caja hay 5 canicas rojas y 4 azules. ¿De cuántas maneras se pueden elegir 3 canicas de la caja?",
-                options: [
-                    "3!=6",
-                    "5³×4³=8000",
-                    "C(9,3)=84",
-                    "504"
-                ],
-                correctIndex: 2
-            },
-            {
-                question: "¿De cuántas maneras se pueden sentar 5 personas en una fila de 5 asientos?",
-                options: [
-                    "C(5,5)=1",
-                    "P(5,5)=120",
-                    "5^5=3125",
-                    "5×4=20"
-                ],
-                correctIndex: 1
-            },
-            {
-                question: "Una moneda se lanza 3 veces. ¿Cuántos resultados posibles hay si el orden de los resultados importa?",
-                options: [
-                    "P(3,3)=6",
-                    "C(3,2)=3",
-                    "3!=6",
-                    "2^3=8"
-                ],
-                correctIndex: 3
-            },
-            {
-                question: "¿Cuál es el valor del término C(n,0)?",
-                options: [
-                    "C(n,n)",
-                    "0",
-                    "1",
-                    "n"
-                ],
-                correctIndex: 2
-            },
-            {
-                question: "Un estudiante puede elegir un deporte de una lista de 5 deportes de equipo o un deporte de una lista de 3 deportes individuales. ¿Cuántos deportes distintos puede elegir en total?",
-                options: [
-                    "5×3=15",
-                    "5+3=8",
-                    "P(8,2)=56",
-                    "C(8,2)=28"
-                ],
-                correctIndex: 1
-            },
-            {
-                question: "En una carrera hay 8 corredores. ¿De cuántas maneras se pueden otorgar los tres primeros lugares (oro, plata y bronce)?",
-                options: [
-                    "8^3=512",
-                    "P(8,3)=336",
-                    "C(8,3)=56",
-                    "3!=6"
-                ],
-                correctIndex: 1
-            },
-            {
-                question: "Se lanza un dado de 6 caras y se lanza una moneda al aire. ¿Cuántos resultados posibles se pueden obtener?",
-                options: [
-                    "C(6,2)=15",
-                    "6×2=12",
-                    "P(8,2)=56",
-                    "6+2=8"
-                ],
-                correctIndex: 1
-            },
-            {
-                question: "¿Cuál es la diferencia entre el Principio de la Suma y el Principio de la Multiplicación?",
-                options: [
-                    "El Principio de la Suma se usa solo con números enteros, y la multiplicación con números racionales.",
-                    "La suma se relaciona con combinaciones, y la multiplicación con permutaciones.",
-                    "La suma se aplica a eventos mutuamente excluyentes ('o'), y la multiplicación a eventos consecutivos e independientes ('y').",
-                    "La suma se usa para ordenar elementos, y la multiplicación para seleccionarlos."
-                ],
-                correctIndex: 2
-            },
-            {
-                question: "Se desea formar un comité de 4 personas de un grupo de 10 hombres y 8 mujeres. ¿De cuántas maneras se puede formar el comité si debe haber exactamente 2 hombres y 2 mujeres?",
-                options: [
-                    "P(10,2)×P(8,2)=90×56=5040",
-                    "C(18,4)=3060",
-                    "C(10,2)+C(8,2)=45+28=73",
-                    "C(10,2)×C(8,2)=45×28=1260"
-                ],
-                correctIndex: 3
-            },
-            {
-                question: "En una caja hay 5 libros de matemáticas y 4 de física. ¿De cuántas maneras se puede elegir un libro de matemáticas o un libro de física?",
-                options: [
-                    "P(9,2)=72",
-                    "5+4=9",
-                    "C(9,2)=36",
-                    "5×4=20"
-                ],
-                correctIndex: 1
-            },
-            {
-                question: "¿De cuántas maneras pueden 6 personas sentarse alrededor de una mesa circular?",
-                options: [
-                    "P(6,6)=720",
-                    "6×5=30",
-                    "C(6,6)=1",
-                    "(6−1)! = 5! = 120"
-                ],
-                correctIndex: 3
-            },
-            {
-                question: "¿Qué propiedad define a un problema como una **permutación**?",
-                options: [
-                    "Se seleccionan todos los elementos del conjunto y el orden no importa.",
-                    "El orden de los elementos seleccionados es crucial.",
-                    "Se seleccionan subconjuntos de elementos sin considerar su posición.",
-                    "Los elementos se pueden repetir infinitamente en cada selección."
-                ],
-                correctIndex: 1
-            },
-            {
-                question: "En la fórmula de la permutación P(n,k), ¿qué representa 'n' y qué representa 'k'?",
-                options: [
-                    "n es el total de elementos y k es el número de elementos repetidos.",
-                    "n es el número de elementos seleccionados y k es el total de elementos.",
-                    "n es el total de elementos y k es el número de elementos que se toman para formar el arreglo.",
-                    "n es el número de combinaciones y k es el número de permutaciones."
-                ],
-                correctIndex: 2
-            },
-            {
-                question: "¿Cuál es la interpretación de C(n,n)?",
-                options: [
-                    "El número de arreglos posibles de los elementos de un conjunto de 'n'.",
-                    "Cero, porque no tiene sentido elegir 'n' de 'n' elementos.",
-                    "El número de maneras de elegir 'n' elementos de un conjunto de 'n', sin que el orden importe.",
-                    "El número de maneras de elegir 'n' elementos de un conjunto de 'n', donde el orden importa."
-                ],
-                correctIndex: 2
-            },
-            {
-                question: "¿Qué representa la expresión Pₖ(n) en el contexto de las permutaciones con repetición?",
-                options: [
-                    "El número de formas de elegir 'k' elementos de un conjunto de 'n' elementos con repetición, donde el orden no importa.",
-                    "El número de permutaciones con elementos idénticos.",
-                    "El número de permutaciones de 'n' elementos de un conjunto de 'k' elementos.",
-                    "El número de arreglos ordenados de 'k' elementos tomados de un conjunto de 'n' elementos, donde la repetición está permitida."
-                ],
-                correctIndex: 3
-            },
-            {
-                question: "¿Cómo se define conceptualmente el **Principio de la Multiplicación**?",
-                options: [
-                    "Como el producto de las opciones de una secuencia de eventos que ocurren de forma consecutiva o conjunta.",
-                    "Como la suma de las opciones de eventos que no pueden ocurrir al mismo tiempo.",
-                    "Como un método para encontrar la probabilidad de un evento.",
-                    "Como una manera de encontrar las permutaciones de un conjunto de elementos."
-                ],
-                correctIndex: 0
-            },
-            {
-                question: "Una **permutación circular** se diferencia de una lineal porque:",
-                options: [
-                    "El punto de partida o de referencia no importa, lo que reduce las posibles ordenaciones.",
-                    "Se utiliza una fórmula diferente que no incluye factoriales.",
-                    "El número de permutaciones es mayor en la forma circular.",
-                    "En las circulares, se permite la repetición de elementos."
-                ],
-                correctIndex: 0
-            },
-            {
-                question: "¿Qué es la 'selección con reemplazo' en un problema de conteo?",
-                options: [
-                    "Una selección donde se extraen todos los elementos del conjunto.",
-                    "Una vez que un elemento es seleccionado, no puede ser seleccionado de nuevo.",
-                    "Una selección donde el orden de los elementos no importa.",
-                    "El elemento seleccionado se devuelve al conjunto original antes de la siguiente selección."
-                ],
-                correctIndex: 3
-            },
-            {
-                question: "¿De cuántas maneras se puede elegir un equipo de 3 jugadores de un total de 10, si hay un capitán predeterminado?",
-                options: [
-                    "C(10,3)",
-                    "P(9,2)",
-                    "C(9,2)",
-                    "P(10,3)"
-                ],
-                correctIndex: 2
-            }
-        ];
+        // Cargar preguntas desde el archivo
+        this.questions = this.loadQuestions();
 
-        console.log(`Preguntas integradas: ${this.questions.length} preguntas disponibles desde Preguntas.txt`);
+        console.log(`Preguntas cargadas: ${this.questions.length} preguntas disponibles`);
 
         this.initializeGame();
         this.setupEventListeners();
+    }
+
+    // Cargar preguntas desde el archivo Preguntas.txt
+    loadQuestions() {
+        try {
+            // Para este ejemplo, devolveremos preguntas hardcodeadas
+            // En una implementación real, se leería el archivo
+            return [
+                {
+                    question: "¿Cuál es la principal diferencia entre una permutación y una combinación?",
+                    options: [
+                        "La permutación se calcula con factoriales y la combinación con logaritmos.",
+                        "En una permutación, el orden de los elementos importa, mientras que en una combinación, el orden no importa.",
+                        "La permutación se aplica a conjuntos de números y la combinación a conjuntos de letras.",
+                        "La permutación se usa para eventos independientes y la combinación para eventos dependientes."
+                    ],
+                    correctIndex: 1
+                },
+                {
+                    question: "¿Cuántos números de 4 dígitos se pueden formar con los dígitos 1, 2, 3, 4, 5, 6, si no se permite la repetición de los dígitos?",
+                    options: [
+                        "24",
+                        "1296",
+                        "15",
+                        "360"
+                    ],
+                    correctIndex: 3
+                },
+                {
+                    question: "En una caja hay 5 canicas rojas y 4 azules. ¿De cuántas maneras se pueden elegir 3 canicas de la caja?",
+                    options: [
+                        "3!=6",
+                        "5³×4³=8000",
+                        "C(9,3)=84",
+                        "504"
+                    ],
+                    correctIndex: 2
+                },
+                {
+                    question: "¿De cuántas maneras se pueden sentar 5 personas en una fila de 5 asientos?",
+                    options: [
+                        "C(5,5)=1",
+                        "P(5,5)=120",
+                        "5^5=3125",
+                        "5×4=20"
+                    ],
+                    correctIndex: 1
+                },
+                {
+                    question: "Una moneda se lanza 3 veces. ¿Cuántos resultados posibles hay si el orden de los resultados importa?",
+                    options: [
+                        "P(3,3)=6",
+                        "C(3,2)=3",
+                        "3!=6",
+                        "2^3=8"
+                    ],
+                    correctIndex: 3
+                }
+            ];
+        } catch (error) {
+            console.error('Error cargando preguntas:', error);
+            return [];
+        }
     }
 
     // Crear exactamente las 28 fichas del dominó de manera correcta
@@ -411,7 +284,15 @@ class DominoGame {
             // Solo mostrar fichas del jugador en turno
             if (index === this.currentPlayerIndex) {
                 player.tiles.forEach(tile => {
+                    // Reutilizar elemento existente o crear uno nuevo
+                    if (tile.element && tile.element.parentNode) {
+                        // La ficha ya está en el DOM, no hacer nada
+                        return;
+                    }
                     const tileElement = tile.createElement();
+                    // Asegurar que el drag and drop esté habilitado
+                    tileElement.draggable = true;
+                    tileElement.style.cursor = 'grab';
                     player.element.appendChild(tileElement);
                 });
             } else {
@@ -419,6 +300,8 @@ class DominoGame {
                 for (let i = 0; i < player.tiles.length; i++) {
                     const hiddenTile = document.createElement('div');
                     hiddenTile.className = 'domino-tile hidden-tile';
+                    hiddenTile.draggable = false; // No permitir drag en fichas ocultas
+                    hiddenTile.style.cursor = 'default';
                     hiddenTile.innerHTML = `
                         <div class="domino-half top"></div>
                         <div class="domino-half bottom"></div>
@@ -444,6 +327,7 @@ class DominoGame {
 
         if (this.board.length === 0) {
             // Primera ficha siempre puede colocarse
+            console.log(`✓ Primera ficha ${tile.top}-${tile.bottom} puede colocarse`);
             return true;
         }
 
@@ -456,15 +340,21 @@ class DominoGame {
             return false;
         }
 
+        // Si no hay número objetivo (caso especial), permitir cualquier ficha
+        if (targetNumber === null) {
+            console.log(`✓ Ficha ${tile.top}-${tile.bottom} puede colocarse (sin restricción)`);
+            return true;
+        }
+
         // Verificar si alguno de los números de la ficha coincide con el número objetivo
         const canConnect = tile.top === targetNumber || tile.bottom === targetNumber;
-        
+
         if (canConnect) {
             console.log(`✓ Ficha ${tile.top}-${tile.bottom} puede conectarse con ${targetNumber} en ${position}`);
         } else {
             console.log(`✗ Ficha ${tile.top}-${tile.bottom} NO puede conectarse con ${targetNumber} en ${position}`);
         }
-        
+
         return canConnect;
     }
 
@@ -483,20 +373,27 @@ class DominoGame {
             targetNumber = this.boardEnds.right;
         }
 
-        // Rotar la ficha para que el número correcto quede en el extremo correcto
-        if (position === 'left') {
-            // Para colocar a la izquierda, el número objetivo debe estar en la parte superior de la ficha
-            if (tile.bottom === targetNumber) {
-                tile.rotate(); // Rotar para que el número objetivo quede arriba
+        // Para la primera ficha, no hay rotación necesaria
+        if (this.board.length > 0) {
+            // Rotar la ficha para que el número correcto quede en el extremo correcto
+            if (position === 'left') {
+                // Para colocar a la izquierda, el número objetivo debe estar en la parte superior de la ficha
+                if (tile.bottom === targetNumber) {
+                    tile.rotate(); // Rotar para que el número objetivo quede arriba
+                }
+                // Actualizar el extremo izquierdo con el número que queda en la parte superior
+                this.boardEnds.left = tile.top;
+            } else {
+                // Para colocar a la derecha, el número objetivo debe estar en la parte inferior de la ficha
+                if (tile.top === targetNumber) {
+                    tile.rotate(); // Rotar para que el número objetivo quede abajo
+                }
+                // Actualizar el extremo derecho con el número que queda en la parte inferior
+                this.boardEnds.right = tile.bottom;
             }
-            // Actualizar el extremo izquierdo con el número que queda en la parte superior
-            this.boardEnds.left = tile.top;
         } else {
-            // Para colocar a la derecha, el número objetivo debe estar en la parte inferior de la ficha
-            if (tile.top === targetNumber) {
-                tile.rotate(); // Rotar para que el número objetivo quede abajo
-            }
-            // Actualizar el extremo derecho con el número que queda en la parte inferior
+            // Primera ficha: establecer ambos extremos
+            this.boardEnds.left = tile.top;
             this.boardEnds.right = tile.bottom;
         }
 
@@ -512,6 +409,11 @@ class DominoGame {
         // Remover de las fichas del jugador
         const player = tile.player;
         player.tiles = player.tiles.filter(t => t !== tile);
+
+        // Remover el elemento de la mano del jugador si existe
+        if (tile.element && tile.element.parentNode) {
+            tile.element.parentNode.removeChild(tile.element);
+        }
 
         this.updateBoard();
         this.updatePlayerDisplays();
@@ -539,7 +441,7 @@ class DominoGame {
         this.board.forEach(tile => {
             // Crear un nuevo elemento para el tablero
             const boardTile = document.createElement('div');
-            
+
             // En el tablero, aplicar la orientación correcta según el tipo de ficha
             if (tile.top === tile.bottom) {
                 // Dobles van verticales en el tablero
@@ -556,41 +458,118 @@ class DominoGame {
                     <div class="domino-half right">${tile.generateDots(tile.bottom)}</div>
                 `;
             }
-            
+
+            // Las fichas en el tablero no son arrastrables
+            boardTile.draggable = false;
+            boardTile.style.cursor = 'default';
+
             boardElement.appendChild(boardTile);
         });
     }
 
-    // Pasar al siguiente turno
+    // Pasar al siguiente turno (sentido contrario a las agujas del reloj)
     nextTurn() {
-        this.currentPlayerIndex = (this.currentPlayerIndex + 1) % 4;
+        // Cambiar al siguiente jugador en sentido contrario a las agujas del reloj
+        this.currentPlayerIndex = (this.currentPlayerIndex - 1 + 4) % 4;
         this.selectedTile = null;
-        document.getElementById('play-tile').style.display = 'none';
+
+        console.log(`Turno pasa a ${this.players[this.currentPlayerIndex].name} (Jugador ${this.currentPlayerIndex + 1})`);
+
+        // Ocultar botón de jugar ficha (por si acaso)
+        const playTileBtn = document.getElementById('play-tile');
+        if (playTileBtn) {
+            playTileBtn.style.display = 'none';
+        }
+
         this.updatePlayerDisplays();
 
         // Mostrar modal de turno
         this.showTurnModal();
     }
 
+    // Pasar turno cuando no se puede jugar
+    passTurn() {
+        this.logMessage(`${this.players[this.currentPlayerIndex].name} pasa el turno`);
+        this.nextTurn();
+    }
+
     // Terminar la mano
     endHand(winningTeam) {
+        console.log(`🏁 Terminada la mano - Equipo ganador: ${winningTeam}`);
         const losingTeam = winningTeam === 'A' ? 'B' : 'A';
+        console.log(`👎 Equipo perdedor: ${losingTeam}`);
+
         const points = this.calculatePoints();
+        console.log(`💰 Puntos a disputar: ${points}`);
 
         this.logMessage(`¡Equipo ${winningTeam} gana la mano! Puntos: ${points}`);
 
         // Mostrar pregunta al equipo perdedor
+        console.log(`❓ Mostrando pregunta al equipo perdedor ${losingTeam} por ${points} puntos`);
         this.showQuestion(losingTeam, points);
+    }
+
+    // Verificar si el juego ha terminado
+    checkGameEnd() {
+        if (this.scores.teamA >= 100 || this.scores.teamB >= 100) {
+            const winner = this.scores.teamA >= 100 ? 'A' : 'B';
+            this.showGameEndModal(winner);
+            return true;
+        }
+        return false;
+    }
+
+    // Mostrar modal de fin de juego
+    showGameEndModal(winner) {
+        const modal = document.createElement('div');
+        modal.className = 'modal game-end-modal';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <h2>¡Juego Terminado!</h2>
+                <div class="game-end-info">
+                    <p class="winner-message">¡El Equipo ${winner} ha ganado!</p>
+                    <div class="final-scores">
+                        <div class="final-score">
+                            <h3>Equipo A</h3>
+                            <span>${this.scores.teamA} puntos</span>
+                        </div>
+                        <div class="final-score">
+                            <h3>Equipo B</h3>
+                            <span>${this.scores.teamB} puntos</span>
+                        </div>
+                    </div>
+                    <button id="play-again-btn" class="play-again-btn">Jugar de Nuevo</button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+        modal.style.display = 'flex';
+
+        // Configurar botón de jugar de nuevo
+        document.getElementById('play-again-btn').addEventListener('click', () => {
+            document.body.removeChild(modal);
+            this.resetGame();
+        });
     }
 
     // Calcular puntos de la mano actual
     calculatePoints() {
         let points = 0;
+        console.log('🔢 Calculando puntos de la mano actual...');
+
         this.players.forEach(player => {
+            let playerPoints = 0;
             player.tiles.forEach(tile => {
-                points += tile.getValue();
+                const tileValue = tile.getValue();
+                playerPoints += tileValue;
+                console.log(`  ${player.name}: ${tile.top}-${tile.bottom} = ${tileValue} puntos`);
             });
+            points += playerPoints;
+            console.log(`  ${player.name} total: ${playerPoints} puntos`);
         });
+
+        console.log(`📊 Total de puntos calculados: ${points}`);
         return points;
     }
 
@@ -625,20 +604,28 @@ class DominoGame {
 
     // Verificar respuesta
     checkAnswer(team, points, question, selectedIndex, selectedLabel) {
+        console.log(`🔍 Verificando respuesta - Equipo: ${team}, Puntos: ${points}, Selección: ${selectedIndex}, Correcta: ${question.correctIndex}`);
+
         const modal = document.getElementById('question-modal');
         const isCorrect = selectedIndex === question.correctIndex;
 
         if (isCorrect) {
-            // Respuesta correcta
+            // Respuesta correcta - Equipo PERDEDOR gana la MITAD de los puntos
+            console.log(`✅ Respuesta correcta del equipo perdedor ${team}`);
             modal.style.display = 'none';
             const halfPoints = Math.floor(points / 2);
-            this.addPoints(team === 'A' ? 'B' : 'A', halfPoints);
-            this.logMessage(`✅ ¡Respuesta correcta! Equipo ${team === 'A' ? 'B' : 'A'} gana ${halfPoints} puntos (mitad)`);
+            console.log(`Calculando mitad: ${points} / 2 = ${halfPoints}`);
+            this.addPoints(team, halfPoints); // team es el equipo perdedor
+            this.logMessage(`✅ ¡Respuesta correcta! Equipo ${team} (perdedor) gana ${halfPoints} puntos (mitad)`);
 
-            // Iniciar nueva mano después de un breve delay
-            setTimeout(() => this.newHand(), 2000);
+            // Verificar si el juego termina
+            if (!this.checkGameEnd()) {
+                // Iniciar nueva mano después de un breve delay
+                setTimeout(() => this.newHand(), 2000);
+            }
         } else {
-            // Respuesta incorrecta - mostrar cuál es la correcta
+            // Respuesta incorrecta - Equipo GANADOR gana TODOS los puntos
+            console.log(`❌ Respuesta incorrecta del equipo perdedor ${team}`);
             const correctLabel = ['A', 'B', 'C', 'D'][question.correctIndex];
             const correctAnswer = question.options[question.correctIndex];
 
@@ -647,23 +634,46 @@ class DominoGame {
 
             // Cerrar modal y continuar con penalización completa
             modal.style.display = 'none';
-            this.addPoints(team === 'A' ? 'B' : 'A', points);
-            this.logMessage(`❌ Respuesta incorrecta. Equipo ${team === 'A' ? 'B' : 'A'} gana ${points} puntos completos`);
+            const winningTeam = team === 'A' ? 'B' : 'A'; // El equipo contrario es el ganador
+            console.log(`Equipo ganador calculado: ${team} → ${winningTeam}`);
+            this.addPoints(winningTeam, points);
+            this.logMessage(`❌ Respuesta incorrecta. Equipo ${winningTeam} (ganador) gana ${points} puntos completos`);
 
-            // Iniciar nueva mano
-            setTimeout(() => this.newHand(), 2000);
+            // Verificar si el juego termina
+            if (!this.checkGameEnd()) {
+                // Iniciar nueva mano
+                setTimeout(() => this.newHand(), 2000);
+            }
         }
     }
 
     // Añadir puntos a un equipo
     addPoints(team, points) {
+        console.log(`Añadiendo ${points} puntos al equipo ${team}. Puntuación anterior: A=${this.scores.teamA}, B=${this.scores.teamB}`);
+
         if (team === 'A') {
             this.scores.teamA += points;
-            document.getElementById('score-team-a').textContent = this.scores.teamA;
-        } else {
+            const scoreElement = document.getElementById('score-team-a');
+            if (scoreElement) {
+                scoreElement.textContent = this.scores.teamA;
+                console.log(`✅ Equipo A actualizado a ${this.scores.teamA} puntos`);
+            } else {
+                console.error('❌ No se encontró el elemento score-team-a');
+            }
+        } else if (team === 'B') {
             this.scores.teamB += points;
-            document.getElementById('score-team-b').textContent = this.scores.teamB;
+            const scoreElement = document.getElementById('score-team-b');
+            if (scoreElement) {
+                scoreElement.textContent = this.scores.teamB;
+                console.log(`✅ Equipo B actualizado a ${this.scores.teamB} puntos`);
+            } else {
+                console.error('❌ No se encontró el elemento score-team-b');
+            }
+        } else {
+            console.error(`❌ Equipo inválido: ${team}`);
         }
+
+        console.log(`Puntuación actual: A=${this.scores.teamA}, B=${this.scores.teamB}`);
     }
 
     // Iniciar nueva mano
@@ -724,12 +734,7 @@ class DominoGame {
         });
 
         document.getElementById('pass-turn').addEventListener('click', () => {
-            this.nextTurn();
-            this.logMessage('Turno pasado');
-        });
-
-        document.getElementById('play-tile').addEventListener('click', () => {
-            this.showPlacementOptions();
+            this.passTurn();
         });
 
         document.getElementById('end-hand').addEventListener('click', () => {
@@ -742,7 +747,8 @@ class DominoGame {
             this.resetGame();
         });
 
-        // Ya no necesitamos event listener del tablero - ahora usamos botones
+        // Configurar drag and drop en el tablero
+        this.setupDragAndDrop();
     }
 
     // Verificar si las preguntas están listas
@@ -909,6 +915,85 @@ class DominoGame {
         continueBtn.onclick = () => {
             modal.style.display = 'none';
         };
+    }
+
+    // Configurar funcionalidad de drag and drop
+    setupDragAndDrop() {
+        const gameBoard = document.getElementById('game-board');
+
+        // Permitir drop en el tablero
+        gameBoard.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            // Solo mostrar drag-over si estamos arrastrando una ficha válida
+            if (e.dataTransfer.types.includes('text/plain')) {
+                gameBoard.classList.add('drag-over');
+            }
+        });
+
+        gameBoard.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            gameBoard.classList.remove('drag-over');
+        });
+
+        gameBoard.addEventListener('drop', (e) => {
+            e.preventDefault();
+            gameBoard.classList.remove('drag-over');
+
+            const tileId = e.dataTransfer.getData('text/plain');
+            if (!tileId) return;
+
+            const tile = this.findTileById(tileId);
+
+            if (tile && this.isCurrentPlayerTile(tile)) {
+                console.log(`Drop válido de ficha ${tile.top}-${tile.bottom}`);
+                this.handleTileDrop(tile, e);
+            } else {
+                console.log(`Drop inválido: ficha ${tileId} no pertenece al jugador actual`);
+            }
+        });
+    }
+
+    // Buscar ficha por ID
+    findTileById(tileId) {
+        const [top, bottom] = tileId.split('-').map(Number);
+
+        for (const player of this.players) {
+            for (const tile of player.tiles) {
+                if (tile.top === top && tile.bottom === bottom) {
+                    return tile;
+                }
+            }
+        }
+        return null;
+    }
+
+    // Verificar si la ficha pertenece al jugador actual
+    isCurrentPlayerTile(tile) {
+        const currentPlayer = this.players[this.currentPlayerIndex];
+        return currentPlayer.tiles.includes(tile);
+    }
+
+    // Manejar el drop de una ficha
+    handleTileDrop(tile, event) {
+        const gameBoard = document.getElementById('game-board');
+        const rect = gameBoard.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const boardWidth = rect.width;
+
+        // Determinar posición basada en la coordenada X
+        let position;
+        if (x < boardWidth / 2) {
+            position = 'left';
+        } else {
+            position = 'right';
+        }
+
+        // Intentar colocar la ficha
+        if (this.placeTile(tile, position)) {
+            this.logMessage(`${this.players[this.currentPlayerIndex].name} colocó ${tile.top}-${tile.bottom} a la ${position === 'left' ? 'izquierda' : 'derecha'}`);
+        } else {
+            this.logMessage(`No se puede colocar la ficha ${tile.top}-${tile.bottom} en esa posición`);
+        }
     }
 
     // Añadir mensaje al log

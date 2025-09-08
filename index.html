@@ -26,7 +26,6 @@
             <button id="start-game">Iniciar Partida</button>
             <button id="draw-tile">Robar Ficha</button>
             <button id="pass-turn">Pasar Turno</button>
-            <button id="play-tile" style="display: none;">Jugar Ficha</button>
             <button id="end-hand">Terminar Mano</button>
             <button id="reset-game">Reiniciar Juego</button>
         </div>
@@ -104,5 +103,70 @@
     </audio>
 
     <script src="game.js"></script>
+
+    <!-- Script de debug para verificar funcionamiento -->
+    <script>
+        // Verificar que el DOM esté cargado correctamente
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM cargado correctamente');
+            console.log('Elementos encontrados:');
+            console.log('- game-board:', document.getElementById('game-board'));
+            console.log('- player1-tiles:', document.getElementById('player1-tiles'));
+            console.log('- player2-tiles:', document.getElementById('player2-tiles'));
+            console.log('- start-game:', document.getElementById('start-game'));
+            console.log('- question-modal:', document.getElementById('question-modal'));
+            console.log('- turn-modal:', document.getElementById('turn-modal'));
+
+            // Verificar soporte de drag and drop
+            const testDiv = document.createElement('div');
+            const hasDragSupport = 'draggable' in testDiv;
+            console.log('Soporte de drag and drop:', hasDragSupport);
+
+            if (!hasDragSupport) {
+                console.warn('El navegador no soporta drag and drop nativo');
+            }
+        });
+
+        // Función de debug para verificar estado del juego
+        window.debugGame = function() {
+            if (typeof game !== 'undefined') {
+                console.log('Estado del juego:', {
+                    currentPlayerIndex: game.currentPlayerIndex,
+                    gameStarted: game.gameStarted,
+                    boardLength: game.board.length,
+                    players: game.players.map(p => ({
+                        name: p.name,
+                        team: p.team,
+                        tileCount: p.tiles.length
+                    })),
+                    scores: game.scores,
+                    boardEnds: game.boardEnds
+                });
+            } else {
+                console.log('El juego no está inicializado');
+            }
+        };
+
+        // Función de prueba para verificar el sistema de puntuación
+        window.testScoring = function() {
+            if (typeof game !== 'undefined') {
+                console.log('🧪 Probando sistema de puntuación...');
+
+                // Simular añadir puntos
+                console.log('Añadiendo 10 puntos al equipo A...');
+                game.addPoints('A', 10);
+
+                console.log('Añadiendo 15 puntos al equipo B...');
+                game.addPoints('B', 15);
+
+                console.log('Añadiendo 5 puntos al equipo A...');
+                game.addPoints('A', 5);
+
+                console.log('Puntuación final:', game.scores);
+            } else {
+                console.log('El juego no está inicializado');
+            }
+        };
+    </script>
 </body>
 </html>
