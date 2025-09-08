@@ -76,11 +76,32 @@
             </div>
         </div>
 
+        <div id="turn-modal" class="modal">
+            <div class="modal-content turn-modal-content">
+                <h2>¡Tu turno!</h2>
+                <div id="turn-player-info" class="turn-player-info">
+                    <div class="player-avatar">
+                        <span id="turn-player-number">1</span>
+                    </div>
+                    <div class="player-details">
+                        <h3 id="turn-player-name">Jugador 1</h3>
+                        <p id="turn-player-team">Equipo A</p>
+                    </div>
+                </div>
+                <button id="continue-turn-btn" class="continue-btn">Continuar</button>
+            </div>
+        </div>
+
         <div id="game-log" class="game-log">
             <h3>Registro del Juego</h3>
             <div id="log-content"></div>
         </div>
     </div>
+
+    <!-- Elemento de audio para el sonido de colocar ficha -->
+    <audio id="put-piece-sound" preload="auto">
+        <source src="recursos/PutPiece.mp3" type="audio/mpeg">
+    </audio>
 
     <script src="game.js"></script>
 </body>

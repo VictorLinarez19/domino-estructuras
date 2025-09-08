@@ -301,6 +301,9 @@ class DominoGame {
         this.updateBoard();
         this.updatePlayerDisplays();
 
+        // Reproducir sonido de colocar ficha
+        this.playAudio();
+
         this.logMessage(`${player.name} colocó ${tile.top}-${tile.bottom} en ${position}. Extremos: ${this.boardEnds.left}-${this.boardEnds.right}`);
 
         // Verificar si el jugador se quedó sin fichas
@@ -349,6 +352,9 @@ class DominoGame {
         this.selectedTile = null;
         document.getElementById('play-tile').style.display = 'none';
         this.updatePlayerDisplays();
+
+        // Mostrar modal de turno
+        this.showTurnModal();
     }
 
     // Terminar la mano
@@ -471,6 +477,9 @@ class DominoGame {
                 this.createTiles(); // Crear fichas solo cuando se inicia la partida
                 this.dealTiles();
                 this.logMessage('Juego iniciado');
+
+                // Mostrar modal del primer turno
+                this.showTurnModal();
             }
         });
 
@@ -650,6 +659,46 @@ class DominoGame {
                 document.body.removeChild(modal);
             });
         });
+    }
+
+    // Reproducir sonido de colocar ficha
+    playAudio() {
+        const audioElement = document.getElementById('put-piece-sound');
+        if (audioElement) {
+            // Reiniciar el audio al principio por si ya se está reproduciendo
+            audioElement.currentTime = 0;
+            audioElement.play().catch(error => {
+                console.log('Error reproduciendo audio:', error);
+            });
+        }
+    }
+
+    // Mostrar modal de turno
+    showTurnModal() {
+        const currentPlayer = this.players[this.currentPlayerIndex];
+
+        // Actualizar información del modal
+        document.getElementById('turn-player-number').textContent = this.currentPlayerIndex + 1;
+        document.getElementById('turn-player-name').textContent = currentPlayer.name;
+        document.getElementById('turn-player-team').textContent = `Equipo ${currentPlayer.team}`;
+
+        // Cambiar color del avatar según el equipo
+        const avatar = document.querySelector('.player-avatar');
+        if (currentPlayer.team === 'A') {
+            avatar.style.background = 'linear-gradient(45deg, #3498db, #2ecc71)';
+        } else {
+            avatar.style.background = 'linear-gradient(45deg, #e74c3c, #f39c12)';
+        }
+
+        // Mostrar modal
+        const modal = document.getElementById('turn-modal');
+        modal.style.display = 'flex';
+
+        // Configurar botón de continuar
+        const continueBtn = document.getElementById('continue-turn-btn');
+        continueBtn.onclick = () => {
+            modal.style.display = 'none';
+        };
     }
 
     // Añadir mensaje al log
