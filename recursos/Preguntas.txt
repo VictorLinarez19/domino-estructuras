@@ -1,0 +1,218 @@
+>1. ¿Cuál es la principal diferencia entre una permutación y una combinación?
+
+A. La permutación se calcula con factoriales y la combinación con logaritmos.
+
+==B. En una permutación, el orden de los elementos importa, mientras que en una combinación, el orden no importa.==
+
+C. La permutación se aplica a conjuntos de números y la combinación a conjuntos de letras.
+
+D. La permutación se usa para eventos independientes y la combinación para eventos dependientes.
+
+>2. ¿Cuántos números de 4 dígitos se pueden formar con los dígitos 1, 2, 3, 4, 5, 6, si no se permite la repetición de los dígitos?
+
+A. 24
+
+B. 1296
+
+C. 15
+
+==D.  360==
+
+>3. En una caja hay 5 canicas rojas y 4 azules. ¿De cuántas maneras se pueden elegir 3 canicas de la caja?
+
+A. 3!=6
+
+B. 53×43=8000
+
+==C.  C(9,3)= 84==
+
+D. 504
+
+>4. ¿De cuántas maneras se pueden sentar 5 personas en una fila de 5 asientos?
+
+A. C(5,5)=1
+
+==B. P(5,5)=120==
+
+C. 55=3125
+
+D. 5×4=20
+
+>5. Una moneda se lanza 3 veces. ¿Cuántos resultados posibles hay si el orden de los resultados importa?
+
+A. P(3,3)=6
+
+B. C(3,2)=3
+
+C. 3!=6
+
+==D. 2^3=8==
+
+
+>6. ¿Cuál es el valor del término C(n,0)?
+
+A. C(n,n)
+
+B. 0
+
+==C. 1==
+
+D. n
+
+>7. Un estudiante puede elegir un deporte de una lista de 5 deportes de equipo o un deporte de una lista de 3 deportes individuales. ¿Cuántos deportes distintos puede elegir en total?
+
+A. 5×3=15
+
+==B. 5+3=8==
+
+C. P(8,2)=56
+
+D. C(8,2)=28
+
+>8. En una carrera hay 8 corredores. ¿De cuántas maneras se pueden otorgar los tres primeros lugares (oro, plata y bronce)?
+
+A. 83=512
+
+==B. P(8,3)=336==
+
+C. C(8,3)=56
+
+D. 3!=6
+
+
+>9. Se lanza un dado de 6 caras y se lanza una moneda al aire. ¿Cuántos resultados posibles se pueden obtener?
+
+A. C(6,2)=15
+
+==B. 6×2=12==
+
+C. P(8,2)=56
+
+D. 6+2=8
+
+
+>10. ¿Cuál es la diferencia entre el Principio de la Suma y el Principio de la Multiplicación?
+
+A. El Principio de la Suma se usa solo con números enteros, y la multiplicación con números racionales.
+
+B. La suma se relaciona con combinaciones, y la multiplicación con permutaciones.
+
+==C. La suma se aplica a eventos mutuamente excluyentes ('o'), y la multiplicación a eventos consecutivos e independientes ('y').==
+
+D. La suma se usa para ordenar elementos, y la multiplicación para seleccionarlos.
+
+
+>11. Se desea formar un comité de 4 personas de un grupo de 10 hombres y 8 mujeres. ¿De cuántas maneras se puede formar el comité si debe haber exactamente 2 hombres y 2 mujeres?
+
+A. P(10,2)×P(8,2)=90×56=5040
+
+B. C(18,4)=3060
+
+C. C(10,2)+C(8,2)=45+28=73
+
+==D. C(10,2)×C(8,2)=45×28=1260==
+
+
+>12. En una caja hay 5 libros de matemáticas y 4 de física. ¿De cuántas maneras se puede elegir un libro de matemáticas o un libro de física?
+
+A. P(9,2)=72
+
+==B. 5+4=9==
+
+C. C(9,2)=36
+
+D. 5×4=20
+
+>13. ¿De cuántas maneras pueden 6 personas sentarse alrededor de una mesa circular?
+
+A. P(6,6)=720
+
+B. 6×5=30
+
+C. C(6,6)=1
+
+==D. (6−1)!=5!=120==
+
+
+>14. ¿Qué propiedad define a un problema como una **permutación**?
+
+A. Se seleccionan todos los elementos del conjunto y el orden no importa.
+
+==B. El orden de los elementos seleccionados es crucial.==
+
+C. Se seleccionan subconjuntos de elementos sin considerar su posición.
+
+D. Los elementos se pueden repetir infinitamente en cada selección.
+
+
+>15. En la fórmula de la permutación P(n,k), ¿qué representa 'n' y qué representa 'k'?
+
+A. n es el total de elementos y k es el número de elementos repetidos.
+
+B. n es el número de elementos seleccionados y k es el total de elementos.
+
+==C. n es el total de elementos y k es el número de elementos que se toman para formar el arreglo.==
+
+D. n es el número de combinaciones y k es el número de permutaciones.
+
+
+>16. ¿Cuál es la interpretación de C(n,n)?
+
+A. El número de arreglos posibles de los elementos de un conjunto de 'n'.
+
+B. Cero, porque no tiene sentido elegir 'n' de 'n' elementos.
+
+==C. El número de maneras de elegir 'n' elementos de un conjunto de 'n', sin que el orden importe.==
+
+D. El número de maneras de elegir 'n' elementos de un conjunto de 'n', donde el orden importa.
+
+
+>17. ¿Qué representa la expresión Pk​(n) en el contexto de las permutaciones con repetición?
+
+A. El número de formas de elegir 'k' elementos de un conjunto de 'n' elementos con repetición, donde el orden no importa.
+
+B. El número de permutaciones con elementos idénticos.
+
+C. El número de permutaciones de 'n' elementos de un conjunto de 'k' elementos.
+
+==D. El número de arreglos ordenados de 'k' elementos tomados de un conjunto de 'n' elementos, donde la repetición está permitida.==
+
+>18. ¿Cómo se define conceptualmente el **Principio de la Multiplicación**?
+
+==A. Como el producto de las opciones de una secuencia de eventos que ocurren de forma consecutiva o conjunta.==
+
+B. Como la suma de las opciones de eventos que no pueden ocurrir al mismo tiempo.
+
+C. Como un método para encontrar la probabilidad de un evento.
+
+D. Como una manera de encontrar las permutaciones de un conjunto de elementos.
+
+>19. Una **permutación circular** se diferencia de una lineal porque:
+
+==A. El punto de partida o de referencia no importa, lo que reduce las posibles ordenaciones.==
+
+B. Se utiliza una fórmula diferente que no incluye factoriales.
+
+C. El número de permutaciones es mayor en la forma circular.
+
+D. En las circulares, se permite la repetición de elementos.
+
+>20. ¿Qué es la 'selección con reemplazo' en un problema de conteo?
+
+A. Una selección donde se extraen todos los elementos del conjunto.
+
+B. Una vez que un elemento es seleccionado, no puede ser seleccionado de nuevo.
+
+C. Una selección donde el orden de los elementos no importa.
+
+==D. El elemento seleccionado se devuelve al conjunto original antes de la siguiente selección.==
+
+>21. ¿De cuántas maneras se puede elegir un equipo de 3 jugadores de un total de 10, si hay un capitán predeterminado?
+
+A. C(10,3)
+
+B. P(9,2)
+
+==C. C(9,2)==
+
+D. P(10,3)
